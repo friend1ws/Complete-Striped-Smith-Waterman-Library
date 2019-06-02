@@ -5,6 +5,8 @@ Please put the path of libssw.so into LD_LIBRARY_PATH or pass it explicitly as a
 By Yongan Zhao (March 2016)
 """
 
+from __future__ import print_function
+
 import sys
 import os.path as op
 import argparse as ap
@@ -52,6 +54,7 @@ def read(sFile):
         sSeq = ''
         s3 = ''
         sQual = ''
+        """
         for l in f:
             sId = l.strip()[1:].split()[0]
             sSeq = f.next()
@@ -59,13 +62,27 @@ def read(sFile):
             sQual = f.next()
 
             yield sId, sSeq, sQual
+        """
+
+        sID = f.readline()
+        while sId:
+            sId = sId.rstrip('\n').split()[0]
+            sSeq = f.readline().rstrip('\n')
+            sId2 = f.readline().rstrip('\n')
+            sQual = f.readline().rstrip('\n')
+            yield sId, sSeq, sQual
+            sID = f.readline()
+
+
+        f.close()
 
 # test if fasta or fastq
     bFasta = True
     ext = op.splitext(sFile)[1][1:].strip().lower()
     if ext == 'gz' or ext == 'gzip':
         with gzip.open(sFile, 'r') as f:
-            l = f.next()
+            # l = f.next()
+            l = f.readline().rstrip('\n')
             if l.startswith('>'):
                 bFasta = True
             elif l.startswith('@'):
@@ -75,7 +92,8 @@ def read(sFile):
                 sys.exit()
     else:
         with open(sFile, 'r') as f:
-            l = f.next()
+            # l = f.next()
+            l = f.readline().rstrip('\n')
             if l.startswith('>'):
                 bFasta = True
             elif l.startswith('@'):
@@ -263,7 +281,7 @@ def main(args):
             qRcProfile = ssw.ssw_init(qRcNum, ct.c_int32(len(sQSeq)), mat, len(lEle), 2)
 # set mask len
         if len(sQSeq) > 30:
-            nMaskLen = len(sQSeq) / 2
+            nMaskLen = int(len(sQSeq) / 2)
         else:
             nMaskLen = 15
 
@@ -310,7 +328,7 @@ def main(args):
                     n3 = 1 + resPrint[4]
                     n4 = min(60,len(sQ)) + resPrint[4] - sQ.count('-',0,60)
                     for i in range(0, len(sQ), 60):
-                        print 'Target:{:>8}\t{}\t{}'.format(n1, sR[i:i+60], n2)
+                        print('Target:{:>8}\t{}\t{}'.format(n1, sR[i:i+60], n2))
                         n1 = n2 + 1
                         n2 = n2 + min(60,len(sR)-i-60) - sR.count('-',i+60,i+120)
 
@@ -383,4 +401,5 @@ if __name__ == '__main__':
     t1 = ti.default_timer()
     main(args)
     t2 = ti.default_timer()
-    print >> sys.stderr, 'CPU time: {} seconds'.format(t2 - t1)
+    print('CPU time: {} seconds'.format(t2 - t1), file = sys.stderr)
+
