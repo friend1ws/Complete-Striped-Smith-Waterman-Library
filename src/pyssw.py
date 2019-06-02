@@ -342,7 +342,9 @@ def main(args):
                 if resPrint[0] == 0:
                     print("4\t*\t0\t255\t*\t*\t0\t0\t*\t*", end = '')
                 else:
-                    mapq = int(-4.343 * math.log(1-abs(resPrint[0]-resPrint[1])/float(resPrint[0])))
+                    mapq = 1-abs(resPrint[0]-resPrint[1])/float(resPrint[0]) 
+                    mapq = -4.343 * math.log(mapq) if mapq > 1e-16 else -4.343 * math.log(1e-16)
+                    # mapq = int(-4.343 * math.log(1-abs(resPrint[0]-resPrint[1])/float(resPrint[0])))
                     mapq = int(mapq + 4.99);
                     if mapq >= 254:
                         mapq = 254
